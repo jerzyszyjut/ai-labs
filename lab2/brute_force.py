@@ -11,7 +11,7 @@ def fitness(items, knapsack_max_capacity, solution):
     return sum(compress(items['Value'], solution))
 
 
-items, knapsack_max_capacity = get_small()
+items, knapsack_max_capacity = get_big()
 print(items)
 
 start_time = time.time()
