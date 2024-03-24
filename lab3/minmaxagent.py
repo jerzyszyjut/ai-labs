@@ -3,7 +3,7 @@ from copy import deepcopy
 
 
 class MinMaxAgent:
-    def __init__(self, my_token='o'):
+    def __init__(self, my_token='o', depth=2):
         self.my_token = my_token
         self.win_patterns = [
             [(0, 1), (0, 2), (0, 3)],
@@ -11,20 +11,38 @@ class MinMaxAgent:
             [(1, 1), (2, 2), (3, 3)],
             [(1, -1), (2, -2), (3, -3)]
         ]
+        self.depth = depth
 
     def evaluate_board(self, board, current_player):
         my_score = 0
         other_score = 0
 
         for player in ['o', 'x']:
+            flag = False
             for pattern in self.win_patterns:
+                if flag:
+                    break
                 for row in range(board.height):
+                    if flag:
+                        break
                     for col in range(board.width):
                         score = self.check_pattern(board, player, pattern, row, col)
                         if player == self.my_token:
                             my_score = max(my_score, score)
                         else:
                             other_score = max(other_score, score)
+                        if player == self.my_token and my_score == 1:
+                            flag = True
+                            break
+                        if player != self.my_token and other_score == 1:
+                            flag = True
+                            break
+
+        if current_player == self.my_token and my_score == 1:
+            return 1
+        
+        if current_player != self.my_token and other_score == 1:
+            return -1
 
         if current_player == self.my_token:
             return my_score - other_score
@@ -64,33 +82,29 @@ class MinMaxAgent:
             return self.evaluate_board(board, current_player)
 
         if current_player == self.my_token:
-            maximum = -float('inf')
-            for column in board.possible_drops():
-                new_board = deepcopy(board)
-                new_board.drop_token(column)
-                value = self.minmax(new_board, self.other_player(current_player), depth-1)
-                maximum = max(maximum, value)
-            return maximum
+            value = -float('inf')
+            value_function = max
         else:
-            minimum = float('inf')
-            for column in board.possible_drops():
-                new_board = deepcopy(board)
-                new_board.drop_token(column)
-                value = self.minmax(new_board, self.other_player(current_player), depth-1)
-                minimum = min(minimum, value)
-            return minimum
+            value = float('inf')
+            value_function = min
+
+        for column in board.possible_drops():
+            new_board = deepcopy(board)
+            new_board.drop_token(column)
+            value = value_function(self.minmax(new_board, self.other_player(current_player), depth-1), value)
+        return value
         
     def decide(self, connect4):
         if connect4.who_moves != self.my_token:
             raise AgentException('not my round')
-        maximum = -float('inf')
+        value = -float('inf')
         best_column = None
         for column in connect4.possible_drops():
             new_board = deepcopy(connect4)
             new_board.drop_token(column)
-            value = self.minmax(new_board, self.other_player(self.my_token), 2)
-            if value > maximum:
-                maximum = value
+            new_value = self.minmax(new_board, self.other_player(self.my_token), self.depth)
+            if new_value > value:
+                value = new_value
                 best_column = column
         return best_column
     

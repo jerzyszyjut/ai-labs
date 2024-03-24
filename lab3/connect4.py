@@ -2,7 +2,7 @@ from exceptions import GameplayException
 from random import shuffle
 
 class Connect4:
-    def __init__(self, width=5, height=4):
+    def __init__(self, width=5, height=4, randomize=False):
         self.width = width
         self.height = height
         self.who_moves = 'o'
@@ -11,10 +11,12 @@ class Connect4:
         self.board = []
         for n_row in range(self.height):
             self.board.append(['_' for _ in range(self.width)])
+        self.randomize = randomize
 
     def possible_drops(self):
         lst = [n_column for n_column in range(self.width) if self.board[0][n_column] == '_']
-        shuffle(lst)
+        if self.randomize:
+            shuffle(lst)
         return lst
 
     def drop_token(self, n_column):

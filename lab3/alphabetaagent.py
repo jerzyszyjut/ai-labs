@@ -15,39 +15,39 @@ class AlphaBetaAgent(MinMaxAgent):
             return self.evaluate_board(board, current_player)
 
         if current_player == self.my_token:
-            maximum = -float('inf')
+            value = -float('inf')
             for column in board.possible_drops():
                 new_board = deepcopy(board)
                 new_board.drop_token(column)
-                value = self.minmax(new_board, self.other_player(current_player), depth-1, alpha, beta)
-                maximum = max(maximum, value)
+                value = max(value, self.minmax(new_board, self.other_player(current_player), depth-1, alpha, beta))
                 alpha = max(alpha, value)
-                if alpha >= beta:
+                if value >= beta:
                     break
-            return maximum
+            return value
         else:
-            minimum = float('inf')
+            value = float('inf')
             for column in board.possible_drops():
                 new_board = deepcopy(board)
                 new_board.drop_token(column)
-                value = self.minmax(new_board, self.other_player(current_player), depth-1, alpha, beta)
-                minimum = min(minimum, value)
+                value = min(value, self.minmax(new_board, self.other_player(current_player), depth-1, alpha, beta))
                 beta = min(beta, value)
-                if alpha >= beta:
+                if value <= alpha:
                     break
-            return minimum
+            return value
 
     def decide(self, connect4):
         if connect4.who_moves != self.my_token:
             raise AgentException('not my round')
 
-        maximum = -float('inf')
+        alpha = -float('inf')
+        value = -float('inf')
         best_column = None
         for column in connect4.possible_drops():
             new_board = deepcopy(connect4)
             new_board.drop_token(column)
-            value = self.minmax(new_board, self.other_player(self.my_token), 3)
-            if value > maximum:
-                maximum = value
+            new_value = self.minmax(new_board, self.other_player(self.my_token), self.depth)
+            if new_value > value:
+                value = new_value
                 best_column = column
+                alpha = max(alpha, value)
         return best_column
