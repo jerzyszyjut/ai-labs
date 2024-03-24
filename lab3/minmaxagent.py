@@ -5,37 +5,48 @@ from copy import deepcopy
 class MinMaxAgent:
     def __init__(self, my_token='o'):
         self.my_token = my_token
+        self.win_patterns = [
+            [(0, 1), (0, 2), (0, 3)],
+            [(1, 0), (2, 0), (3, 0)],
+            [(1, 1), (2, 2), (3, 3)],
+            [(1, -1), (2, -2), (3, -3)]
+        ]
 
-    def evaluate_board(self, board, player):
+    def evaluate_board(self, board, current_player):
+        my_score = 0
+        other_score = 0
+
+        for player in ['o', 'x']:
+            for pattern in self.win_patterns:
+                for row in range(board.height):
+                    for col in range(board.width):
+                        score = self.check_pattern(board, player, pattern, row, col)
+                        if player == self.my_token:
+                            my_score = max(my_score, score)
+                        else:
+                            other_score = max(other_score, score)
+
+        if current_player == self.my_token:
+            return my_score - other_score
+        else:
+            return other_score - my_score
+
+    def check_pattern(self, board, player, pattern, row, col):
         score = 0
-
-        for row in range(board.height):
-            for column in range(board.width-3):
-                if board.board[row][column] == board.board[row][column+1] == player and board.board[row][column+2] == board.board[row][column+3] == '_':
-                    score = max(score, 0.4)
-                if board.board[row][column] == board.board[row][column+1] == board.board[row][column+2] == player and board.board[row][column+3] == '_':
-                    score = max(score, 0.8)
-                if board.board[row][column] == board.board[row][column+1] == board.board[row][column+2] == board.board[row][column+3] == player:
-                    score = max(score, 1)
-
-        for row in range(board.height-3):
-            for column in range(board.width):
-                if board.board[row][column] == board.board[row+1][column] == player and board.board[row+2][column] == board.board[row+3][column] == '_':
-                    score = max(score, 0.4)
-                if board.board[row][column] == board.board[row+1][column] == board.board[row+2][column] == player and board.board[row+3][column] == '_':
-                    score = max(score, 0.8)
-                if board.board[row][column] == board.board[row+1][column] == board.board[row+2][column] == board.board[row+3][column] == player:
-                    score = max(score, 1)
-
-        for row in range(board.height-3):
-            for column in range(board.width-3):
-                if board.board[row][column] == board.board[row+1][column+1] == player and board.board[row+2][column+2] == board.board[row+3][column+3] == '_':
-                    score = max(score, 0.4)
-                if board.board[row][column] == board.board[row+1][column+1] == board.board[row+2][column+2] == player and board.board[row+3][column+3] == '_':
-                    score = max(score, 0.8)
-                if board.board[row][column] == board.board[row+1][column+1] == board.board[row+2][column+2] == board.board[row+3][column+3] == player:
-                    score = max(score, 1)
-
+        for dr, dc in pattern:
+            total = 0
+            for i in range(4):
+                r, c = row + i * dr, col + i * dc
+                if 0 <= r < board.height and 0 <= c < board.width:
+                    if board.board[r][c] == player:
+                        total += 1
+                    elif board.board[r][c] != '_':
+                        total = 0
+                        break
+                else:
+                    total = 0
+                    break
+            score = max(score, total / 4)
         return score
 
     def other_player(self, player):
@@ -50,7 +61,7 @@ class MinMaxAgent:
             return 0
     
         if depth == 0:
-            return self.evaluate_board(board, self.my_token) - self.evaluate_board(board, self.other_player(self.my_token))
+            return self.evaluate_board(board, current_player)
 
         if current_player == self.my_token:
             maximum = -float('inf')
@@ -77,7 +88,7 @@ class MinMaxAgent:
         for column in connect4.possible_drops():
             new_board = deepcopy(connect4)
             new_board.drop_token(column)
-            value = self.minmax(new_board, self.other_player(self.my_token), 4)
+            value = self.minmax(new_board, self.other_player(self.my_token), 2)
             if value > maximum:
                 maximum = value
                 best_column = column

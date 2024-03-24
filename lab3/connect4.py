@@ -1,5 +1,5 @@
 from exceptions import GameplayException
-
+from random import shuffle
 
 class Connect4:
     def __init__(self, width=5, height=4):
@@ -13,7 +13,9 @@ class Connect4:
             self.board.append(['_' for _ in range(self.width)])
 
     def possible_drops(self):
-        return [n_column for n_column in range(self.width) if self.board[0][n_column] == '_']
+        lst = [n_column for n_column in range(self.width) if self.board[0][n_column] == '_']
+        shuffle(lst)
+        return lst
 
     def drop_token(self, n_column):
         if self.game_over:

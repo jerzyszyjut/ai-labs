@@ -12,7 +12,7 @@ class AlphaBetaAgent(MinMaxAgent):
             return 0
     
         if depth == 0:
-            return self.evaluate_board(board, self.my_token) - self.evaluate_board(board, self.other_player(self.my_token))
+            return self.evaluate_board(board, current_player)
 
         if current_player == self.my_token:
             maximum = -float('inf')
@@ -46,7 +46,7 @@ class AlphaBetaAgent(MinMaxAgent):
         for column in connect4.possible_drops():
             new_board = deepcopy(connect4)
             new_board.drop_token(column)
-            value = self.minmax(new_board, self.other_player(self.my_token), 5)
+            value = self.minmax(new_board, self.other_player(self.my_token), 3)
             if value > maximum:
                 maximum = value
                 best_column = column
