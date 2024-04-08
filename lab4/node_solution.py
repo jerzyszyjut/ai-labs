@@ -50,11 +50,11 @@ class Node:
         best_gain = -np.inf
         best_split = None
 
-        max_params = feature_subset if feature_subset is not None else int(sqrt(X.shape[1]))
+        feature_subset = feature_subset if feature_subset is not None else int(sqrt(X.shape[1]) + 1)
 
-        features = np.random.choice(X.shape[1], max_params, replace=False)
+        selected_features = np.random.choice(X.shape[1], feature_subset, replace=False)
 
-        for d in features:
+        for d in selected_features:
             order = np.argsort(X[:, d])
             y_sorted = y[order]
             possible_splits = self.find_possible_splits(X[order, d])
