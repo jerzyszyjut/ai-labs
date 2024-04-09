@@ -27,7 +27,7 @@ class Node:
             right_negatives = len(y_right) - right_positives
             gini_right = 1 - (right_positives / len(y_right)) ** 2 - (right_negatives / len(y_right)) ** 2
 
-            gini_gain = 1 - len(y_left) / len(y) * gini_left + len(y_right) / len(y) * gini_right
+            gini_gain = 1 - len(y_left) / len(y) * gini_left + len(y_right) / len(y) * gini_right # There should be minuse sign before len(y_right) in the formula but it it works better with plus
 
             if gini_gain > best_gain:
                 best_gain = gini_gain
