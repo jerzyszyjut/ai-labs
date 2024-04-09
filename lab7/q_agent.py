@@ -12,7 +12,7 @@ class QAgent(Agent):
         # hyperparams
         # ustaw te parametry na sensowne wartości
         self.lr =               0.05         # współczynnik uczenia (learning rate)
-        self.gamma =            0.95         # współczynnik dyskontowania
+        self.gamma =            0.8         # współczynnik dyskontowania
         self.epsilon =          1e-1        # epsilon (p-wo akcji losowej)
         self.eps_decrement =    1e-4       # wartość, o którą zmniejsza się epsilon po każdym kroku
         self.eps_min =          1e-3        # końcowa wartość epsilon, poniżej którego już nie jest zmniejszane
