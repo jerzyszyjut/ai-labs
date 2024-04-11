@@ -4,14 +4,15 @@ from randomagent import RandomAgent
 from minmaxagent import MinMaxAgent
 from alphabetaagent import AlphaBetaAgent
 
-GAMES_COUNT = 10
+GAMES_COUNT = 1
 
 agent1_wins = 0
 agent2_wins = 0
 for i in range(GAMES_COUNT):
-    connect4 = Connect4(width=7, height=6, randomize=True)
-    agent1 = AlphaBetaAgent('o', depth=4)
-    agent2 = MinMaxAgent('x', depth=2)
+    connect4 = Connect4(width=7, height=6)
+    agent1 = MinMaxAgent('o', depth=2)
+    # agent2 = AlphaBetaAgent('o', depth=5)
+    agent2 = MinMaxAgent('x', depth=2, heuristic=False)
     while not connect4.game_over:
         connect4.draw()
         try:

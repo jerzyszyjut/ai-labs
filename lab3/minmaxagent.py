@@ -3,7 +3,7 @@ from copy import deepcopy
 
 
 class MinMaxAgent:
-    def __init__(self, my_token='o', depth=2):
+    def __init__(self, my_token='o', depth=2, heuristic=True):
         self.my_token = my_token
         self.win_patterns = [
             [(0, 1), (0, 2), (0, 3)],
@@ -12,6 +12,7 @@ class MinMaxAgent:
             [(1, -1), (2, -2), (3, -3)]
         ]
         self.depth = depth
+        self.heuristic = heuristic
 
     def evaluate_board(self, board, current_player):
         my_score = 0
@@ -43,7 +44,7 @@ class MinMaxAgent:
         
         if current_player != self.my_token and other_score == 1:
             return -1
-
+        
         if current_player == self.my_token:
             return my_score - other_score
         else:
@@ -59,12 +60,16 @@ class MinMaxAgent:
                     if board.board[r][c] == player:
                         total += 1
                     elif board.board[r][c] != '_':
-                        total = 0
+                        total = max(total, 0)
                         break
                 else:
-                    total = 0
+                    total = max(total, 0)
                     break
-            score = max(score, total / 4)
+            if total == 3:
+                score += total / 8
+                score = min(total, 7 / 8)
+            else:
+                score = max(score, total / 8)
         return score
 
     def other_player(self, player):
@@ -78,8 +83,10 @@ class MinMaxAgent:
                 return -1
             return 0
     
-        if depth == 0:
+        if depth == 0 and self.heuristic:
             return self.evaluate_board(board, current_player)
+        if depth == 0 and not self.heuristic:
+            return 0
 
         if current_player == self.my_token:
             value = -float('inf')
