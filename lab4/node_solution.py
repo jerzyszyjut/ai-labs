@@ -3,6 +3,7 @@ import copy
 import numpy as np
 from math import sqrt
 
+
 class Node:
     def __init__(self):
         self.left_child = None
@@ -16,18 +17,30 @@ class Node:
         best_idx = 0
 
         for idx in possible_splits:
-            y_left = y[:idx + 1]
-            y_right = y[idx + 1:]
-            
+            y_left = y[: idx + 1]
+            y_right = y[idx + 1 :]
+
             left_positives = np.sum(y_left)
             left_negatives = len(y_left) - left_positives
-            gini_left = 1 - (left_positives / len(y_left)) ** 2 - (left_negatives / len(y_left)) ** 2
+            gini_left = (
+                1
+                - (left_positives / len(y_left)) ** 2
+                - (left_negatives / len(y_left)) ** 2
+            )
 
             right_positives = np.sum(y_right)
             right_negatives = len(y_right) - right_positives
-            gini_right = 1 - (right_positives / len(y_right)) ** 2 - (right_negatives / len(y_right)) ** 2
+            gini_right = (
+                1
+                - (right_positives / len(y_right)) ** 2
+                - (right_negatives / len(y_right)) ** 2
+            )
 
-            gini_gain = 1 - len(y_left) / len(y) * gini_left + len(y_right) / len(y) * gini_right # There should be minuse sign before len(y_right) in the formula but it it works better with plus
+            gini_gain = (
+                1
+                - len(y_left) / len(y) * gini_left
+                + len(y_right) / len(y) * gini_right
+            )  # There should be minuse sign before len(y_right) in the formula but it it works better with plus
 
             if gini_gain > best_gain:
                 best_gain = gini_gain
@@ -50,7 +63,15 @@ class Node:
         best_gain = -np.inf
         best_split = None
 
-        feature_subset = feature_subset if feature_subset is not None else int(sqrt(X.shape[1]) + 1)
+        # Wybór cech do podziału powinien dziać się na poziomie random forest,
+        # a nie w każdym węźle drzewa. W przeciwnym razie cechy w zwykłym drzewie
+        # też będą wybierane losowo, co nie ma sensu.
+        # Poniższy błąd wynika z błędu w instrukcji, ale i tak było to zaliczane
+        # jako poprawne rozwiązanie.
+
+        feature_subset = (
+            feature_subset if feature_subset is not None else int(sqrt(X.shape[1]) + 1)
+        )
 
         selected_features = np.random.choice(X.shape[1], feature_subset, replace=False)
 
@@ -77,19 +98,10 @@ class Node:
             return self.left_child.predict(x)
         else:
             return self.right_child.predict(x)
-
-    def train(self, X, y, params):
-
-        self.node_prediction = np.mean(y)
-        if X.shape[0] == 1 or self.node_prediction == 0 or self.node_prediction == 1:
-            return True
-
-        self.feature_idx, self.feature_value = self.find_best_split(X, y, params["feature_subset"])
-
-        if self.feature_idx is None:
-            return True
-
-        (X_left, y_left), (X_right, y_right) = self.split_data(X, y, self.feature_idx, self.feature_value)
+        # Wybór cech do podziału powinien dziać się na poziomie
+        (X_left, y_left), (X_right, y_right) = self.split_data(
+            X, y, self.feature_idx, self.feature_value
+        )
 
         if X_left.shape[0] == 0 or X_right.shape[0] == 0:
             self.feature_idx = None
